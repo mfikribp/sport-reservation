@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sportify - Booking Lapangan Olahraga</title>
+    <meta name="description"
+        content="Platform reservasi lapangan olahraga tercepat dan terpercaya. Booking futsal, mini soccer, tenis, padel, basket online.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* ===== NAVBAR ===== */
+        nav {
+            display: flex;
+            flex-direction: column;
+            padding: 0 5%;
+            background-color: rgba(15, 23, 42, 0.97);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 200;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            flex-shrink: 0;
+        }
+
+        /* Desktop nav links */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links button,
+        .nav-links .btn-nav {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .nav-links button.primary-btn {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .nav-links button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        /* Hamburger */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 6px;
+            background: transparent;
+            border: none;
+        }
+
+        .hamburger span {
+            width: 24px;
+            height: 2px;
+            background: var(--text-main);
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        /* Mobile nav overlay */
+        .mobile-nav {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            padding: 1rem 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .mobile-nav.open {
+            display: flex;
+        }
+
+        .mobile-nav button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .mobile-nav button.primary-btn {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .mobile-nav button:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .mobile-nav .mobile-user-info {
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Category nav */
+        .nav-categories {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            scrollbar-width: none;
+        }
+
+        .nav-categories::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: transparent;
+            color: white;
+            border: 1px solid transparent;
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .category-btn i {
+            font-size: 1.1rem;
+        }
+
+        .category-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .category-btn.active {
+            border-color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ===== HERO ===== */
+        header {
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem 5%;
+            margin-top: 130px;
+            background: radial-gradient(circle at center, #1e293b 0%, var(--dark) 100%);
+        }
+
+        header h1 {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            margin-bottom: 1rem;
+            animation: fadeInDown 1s ease-out;
+            line-height: 1.2;
+        }
+
+        header p {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-out 0.5s both;
+        }
+
+        .hero-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .hero-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+        }
+
+        /* ===== LAPANGAN SECTION ===== */
+        .section-title {
+            text-align: center;
+            margin: 4rem 0 2rem;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 600;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 0 5%;
+            margin-bottom: 4rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-color: rgba(14, 165, 233, 0.3);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(45deg, #0f172a, #334155);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover .card-img img {
+            transform: scale(1.05);
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--secondary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        .card-content {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-location {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-bottom: 1.25rem;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        .card-price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.25rem;
+        }
+
+        .card-price span {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .btn-book {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-book:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.4);
+            }
+        }
+
+        /* ===== MODALS ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 1.75rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid var(--border);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.25);
+            color: white;
+            outline: none;
+            font-size: 0.95rem;
+            transition: border 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: var(--primary);
+        }
+
+        #empty-state {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 3rem;
+            color: var(--text-muted);
+            display: none;
+        }
+
+        /* Pesanan items */
+        .pesanan-item {
+            background: rgba(0, 0, 0, 0.25);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+
+        .pesanan-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .pesanan-top strong {
+            font-size: 0.95rem;
+        }
+
+        .status-pill {
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .pesanan-jadwal {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .pesanan-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+
+        .btn-upload {
+            flex: 1;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 600;
+            min-width: 100px;
+        }
+
+        .btn-cancel-order {
+            flex: 1;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 600;
+            min-width: 100px;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel-order:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .rejected-alert {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            border-radius: 8px;
+            padding: 0.7rem 0.9rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .rejected-alert .icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .rejected-alert .title {
+            color: #fca5a5;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .rejected-alert .desc {
+            color: #f87171;
+            font-size: 0.8rem;
+            margin-top: 2px;
+        }
+
+        /* WhatsApp refund notice */
+        .refund-notice {
+            background: rgba(37, 211, 102, 0.1);
+            border: 1px solid rgba(37, 211, 102, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .refund-notice h4 {
+            color: #25d366;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .refund-notice p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .btn-whatsapp {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #25d366;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 7px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-whatsapp:hover {
+            background: #1da851;
+            transform: translateY(-1px);
+        }
+
+        /* File input styling */
+        .file-input-wrapper {
+            margin-bottom: 10px;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            font-size: 0.82rem;
+            width: 100%;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 4%;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            header {
+                margin-top: 120px;
+                padding: 2rem 4%;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                padding: 0 4%;
+                gap: 1.25rem;
+            }
+
+            .modal-content {
+                padding: 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.6rem;
+            }
+
+            .card-img {
+                height: 180px;
+            }
+
+            .hero-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        /* ===== TOAST NOTIFICATION ===== */
+        #toast-container {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0.85rem 1.25rem;
+            font-size: 0.875rem;
+            color: var(--text-main);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 320px;
+            pointer-events: all;
+            animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .toast.removing {
+            animation: toastOut 0.3s ease forwards;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--secondary);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--primary);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--accent);
+        }
+
+        .toast-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .toast-msg {
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+
+        /* Inline form error */
+        .form-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            margin-bottom: 0.75rem;
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            #toast-container {
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+            }
+
+            .toast {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-top">
+            <div class="logo">Sportify.</div>
+            <div class="nav-links" id="navLinks">
+                <button onclick="openModal('loginModal')">Masuk</button>
+                <button class="primary-btn" onclick="openModal('registerModal')">Daftar</button>
+            </div>
+            <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileNav()" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+        <div class="mobile-nav" id="mobileNav">
+            <!-- Populated by JS -->
+        </div>
+        <div class="nav-categories">
+            <button class="category-btn active" onclick="setActiveCat(this, 'Semua')"><i class="ph ph-squares-four"></i>
+                Semua</button>
+            <button class="category-btn" onclick="setActiveCat(this, 'Mini Soccer')"><i class="ph ph-soccer-ball"></i>
+                Mini Soccer</button>
+            <button class="category-btn" onclick="setActiveCat(this, 'Futsal')"><i class="ph ph-sneaker"></i>
+                Futsal</button>
+            <button class="category-btn" onclick="setActiveCat(this, 'Tenis')"><i class="ph ph-tennis-ball"></i>
+                Tenis</button>
+            <button class="category-btn" onclick="setActiveCat(this, 'Padel')"><i class="ph ph-ping-pong"></i>
+                Padel</button>
+            <button class="category-btn" onclick="setActiveCat(this, 'Basket')"><i class="ph ph-basketball"></i>
+                Basket</button>
+        </div>
+    </nav>
+
+    <header>
+        <h1>Booking Lapangan Impianmu</h1>
+        <p>Platform reservasi lapangan olahraga tercepat, aman, dan dapat diandalkan. Mainkan olahraga favorit Anda
+            tanpa ribet.</p>
+        <button class="hero-btn" onclick="document.getElementById('lapangan').scrollIntoView({behavior:'smooth'})">Lihat
+            Lapangan Tersedia</button>
+    </header>
+
+    <section id="lapangan">
+        <h2 class="section-title">Daftar Lapangan</h2>
+        <div class="loader" id="loader">Memuat data lapangan...</div>
+        <div class="grid" id="lapanganGrid">
+            <div id="empty-state">
+                <p>Belum ada daftar lapangan yang tersedia saat ini.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Masuk</h3>
+                <button class="close-btn" onclick="closeModal('loginModal')">&times;</button>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-error" id="loginError"></div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" class="form-control" required placeholder="email@contoh.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••">
+                </div>
+                <button type="submit" id="btnLogin" class="btn-book" style="margin-top:1rem;">Masuk</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Daftar Akun</h3>
+                <button class="close-btn" onclick="closeModal('registerModal')">&times;</button>
+            </div>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-error" id="registerError"></div>
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="registerName" class="form-control" required placeholder="Nama Anda">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" class="form-control" required placeholder="email@contoh.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="registerPassword" class="form-control" required placeholder="••••••••">
+                </div>
+                <button type="submit" id="btnRegister" class="btn-book" style="margin-top:1rem;">Daftar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Jadwal Modal -->
+    <div class="modal" id="jadwalModal">
+        <div class="modal-content" style="max-width:520px;">
+            <div class="modal-header">
+                <h3 id="jadwalTitle">Pilih Jadwal</h3>
+                <button class="close-btn" onclick="closeModal('jadwalModal')">&times;</button>
+            </div>
+            <div id="jadwalList" style="max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
+                <div class="loader" style="display:block;">Memuat jadwal...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pesanan Modal -->
+    <div class="modal" id="pesananModal">
+        <div class="modal-content" style="max-width:600px;">
+            <div class="modal-header">
+                <h3>Pesanan Saya</h3>
+                <button class="close-btn" onclick="closeModal('pesananModal')">&times;</button>
+            </div>
+            <div id="pesananList" style="max-height:70vh;overflow-y:auto;display:flex;flex-direction:column;gap:0;">
+                <div class="loader" style="display:block;">Memuat pesanan...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+        // ===== TOAST =====
+        const toastIcons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+        function showToast(msg, type = 'info', duration = 3500) {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.innerHTML = `<span class="toast-icon">${toastIcons[type] || 'ℹ️'}</span><span class="toast-msg">${msg}</span>`;
+            container.appendChild(t);
+            setTimeout(() => {
+                t.classList.add('removing');
+                setTimeout(() => t.remove(), 300);
+            }, duration);
+        }
+
+        function showFormError(id, msg) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+        function clearFormError(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        }
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        window.onclick = function (e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+
+        // ===== MOBILE NAV =====
+        function toggleMobileNav() {
+            document.getElementById('mobileNav').classList.toggle('open');
+        }
+
+        function renderMobileNav() {
+            const userStr = localStorage.getItem('user');
+            const mobileNav = document.getElementById('mobileNav');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                mobileNav.innerHTML = `
+                    <div class="mobile-user-info">👋 Halo, ${user.name}</div>
+                    <button onclick="openPesanan();toggleMobileNav()" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.4);color:#fbbf24;">📋 Pesanan Saya</button>
+                    <button onclick="handleLogout()" style="border-color:rgba(239,68,68,0.4);color:#fca5a5;">Logout</button>
+                `;
+            } else {
+                mobileNav.innerHTML = `
+                    <button onclick="openModal('loginModal');toggleMobileNav()">Masuk</button>
+                    <button class="primary-btn" onclick="openModal('registerModal');toggleMobileNav()">Daftar</button>
+                `;
+            }
+        }
+
+        // ===== DATA =====
+        let allLapanganData = [];
+        let currentCategory = 'Semua';
+
+        function setActiveCat(btn, category) {
+            document.querySelectorAll('.category-btn').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+            currentCategory = category;
+            renderLapangan();
+            document.getElementById('lapangan').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+
+        async function fetchLapangan() {
+            const loader = document.getElementById('loader');
+            loader.style.display = 'block';
+            try {
+                const res = await fetch('/api/lapangan');
+                const result = await res.json();
+                loader.style.display = 'none';
+
+                if (!result.data || result.data.length === 0) {
+                    result.data = [
+                        { id: 1, nama: 'Lapang Mini Soccer Andromeda', lokasi: 'Jl. Sudirman No 1', status: 'active', harga_per_jam: 150000, deskripsi: 'Fasilitas lengkap: Kamar ganti, Tribun penonton, Parkir luas, dan Cafe.' },
+                        { id: 2, nama: 'Lapang Futsal Galaxy', lokasi: 'Jl. Merdeka No 45', status: 'active', harga_per_jam: 100000, deskripsi: 'Lapang indoor menggunakan rumput sintetis standar internasional.' },
+                        { id: 3, nama: 'Lapang Tenis Wimbledon', lokasi: 'Jl. Gatot Subroto No 9', status: 'active', harga_per_jam: 120000, deskripsi: 'Permukaan hard court dengan pencahayaan LED yang sangat terang.' },
+                        { id: 4, nama: 'Lapang Padel 76', lokasi: 'Jl. Kopo No 59', status: 'active', harga_per_jam: 100000, deskripsi: 'Lapangan outdoor yang nyaman.' },
+                        { id: 5, nama: 'Lapang Basket Sangkuriang', lokasi: 'Jl. Budiawan No 7', status: 'active', harga_per_jam: 120000, deskripsi: 'Nyaman dan fasilitas lengkap.' }
+                    ];
+                }
+
+                allLapanganData = result.data || [];
+                renderLapangan();
+            } catch (err) {
+                loader.style.display = 'none';
+                document.getElementById('lapanganGrid').innerHTML = '<div style="text-align:center;grid-column:1/-1;padding:3rem;color:#ef4444;"><p>Gagal memuat data. Pastikan server API berjalan.</p></div>';
+            }
+        }
+
+        function renderLapangan() {
+            const grid = document.getElementById('lapanganGrid');
+            let filtered = allLapanganData;
+            if (currentCategory !== 'Semua') {
+                filtered = allLapanganData.filter(item => item.nama.toLowerCase().includes(currentCategory.toLowerCase()));
+            }
+
+            if (filtered.length > 0) {
+                grid.innerHTML = filtered.map(item => {
+                    let imgSrc = 'https://via.placeholder.com/600x400/334155/94a3b8?text=Foto+Lapangan';
+                    if (item.gambar_url) {
+                        imgSrc = item.gambar_url;
+                    } else {
+                        const nl = item.nama.toLowerCase();
+                        if (nl.includes('futsal')) imgSrc = '/img/futsal/lapangan futsal.jpg';
+                        else if (nl.includes('mini soccer') || nl.includes('minsoc')) imgSrc = '/img/minsoc/minsoc.jpg';
+                        else if (nl.includes('tenis')) imgSrc = '/img/tenis/tenis.jpg';
+                        else if (nl.includes('padel')) imgSrc = '/img/padel/175972269844055.image_cropper_92134369-59E0-419C-9289-1627AC564D1F-5129-000001342E9B5E03.jpg.jpeg';
+                        else if (nl.includes('basket')) imgSrc = '/img/basket/176354011053816.image_cropper_1763540092661.jpg.jpeg';
+                    }
+
+                    return `
+                    <div class="card">
+                        <div class="card-img">
+                            <span class="status-badge" style="${item.status === 'active' ? '' : 'background: var(--danger);'}">${item.status === 'active' ? 'Tersedia' : 'Tutup'}</span>
+                            <img src="${imgSrc}" onerror="this.onerror=null;this.src='https://via.placeholder.com/600x400/334155/94a3b8?text=Foto+Lapangan';" alt="Foto ${item.nama}">
+                        </div>
+                        <div class="card-content">
+                            <h3 class="card-title">${item.nama}</h3>
+                            <div class="card-location">📍 ${item.lokasi}</div>
+                            <p class="card-desc">${item.deskripsi || 'Deskripsi fasilitas lapangan belum ditambahkan.'}</p>
+                            <div class="card-price">${formatRupiah(item.harga_per_jam)} <span>/ jam</span></div>
+                            <button class="btn-book" onclick="openJadwalMenu(${item.id}, '${item.nama}')" ${item.status === 'active' ? '' : 'disabled style="background:var(--text-muted); cursor:not-allowed;"'}>${item.status === 'active' ? 'Booking Sekarang' : 'Tidak Tersedia'}</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            } else {
+                grid.innerHTML = `<div style="text-align:center;grid-column:1/-1;padding:3rem;color:var(--text-muted);"><p>Belum ada lapangan <strong>${currentCategory}</strong> yang tersedia saat ini.</p></div>`;
+            }
+        }
+
+        // ===== AUTH =====
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnLogin');
+            btn.innerText = 'Memproses...'; btn.disabled = true;
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    closeModal('loginModal');
+                    clearFormError('loginError');
+                    document.getElementById('loginForm').reset();
+                    checkAuth();
+                    showToast('Login berhasil! Selamat datang, ' + data.user.name, 'success');
+                } else {
+                    showFormError('loginError', data.error || 'Login gagal. Periksa email dan password Anda.');
+                }
+            } catch { showFormError('loginError', 'Tidak dapat terhubung ke server.'); }
+            finally { btn.innerText = 'Masuk'; btn.disabled = false; }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnRegister');
+            btn.innerText = 'Memproses...'; btn.disabled = true;
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: document.getElementById('registerName').value, email: document.getElementById('registerEmail').value, password: document.getElementById('registerPassword').value })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Registrasi berhasil! Silakan login.', 'success');
+                    clearFormError('registerError');
+                    document.getElementById('registerForm').reset();
+                    closeModal('registerModal');
+                    openModal('loginModal');
+                } else {
+                    showFormError('registerError', data.error || 'Registrasi gagal.');
+                }
+            } catch { showFormError('registerError', 'Tidak dapat terhubung ke server.'); }
+            finally { btn.innerText = 'Daftar'; btn.disabled = false; }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            checkAuth();
+        }
+
+        function checkAuth() {
+            const userStr = localStorage.getItem('user');
+            const navLinks = document.getElementById('navLinks');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                navLinks.innerHTML = `
+                    <span style="margin-right:10px;font-weight:bold;font-size:0.9rem;">Halo, ${user.name}</span>
+                    <button class="primary-btn" onclick="openPesanan()" style="background:var(--accent);border-color:var(--accent);">Pesanan</button>
+                    <button class="primary-btn" onclick="handleLogout()" style="background:#ef4444;border-color:#ef4444;">Logout</button>
+                `;
+            } else {
+                navLinks.innerHTML = `
+                    <button onclick="openModal('loginModal')">Masuk</button>
+                    <button class="primary-btn" onclick="openModal('registerModal')">Daftar</button>
+                `;
+            }
+            renderMobileNav();
+        }
+
+        // ===== JADWAL =====
+        async function openJadwalMenu(lap_id, lap_nama) {
+            const token = localStorage.getItem('token');
+            if (!token) { showToast('Silakan login terlebih dahulu untuk memesan.', 'warning'); openModal('loginModal'); return; }
+
+            document.getElementById('jadwalTitle').innerText = 'Jadwal: ' + lap_nama;
+            openModal('jadwalModal');
+            document.getElementById('jadwalList').innerHTML = '<div class="loader" style="display:block;">Memuat jadwal...</div>';
+
+            try {
+                const res = await fetch('/api/jadwal?lapangan_id=' + lap_id);
+                const result = await res.json();
+                const list = document.getElementById('jadwalList');
+
+                if (result.data && result.data.length > 0) {
+                    list.innerHTML = result.data.map(j => {
+                        const d = new Date(j.tanggal);
+                        const fmtTgl = isNaN(d) ? j.tanggal : d.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                        const jM = j.jam_mulai.substring(0, 5);
+                        const jS = j.jam_selesai.substring(0, 5);
+                        const tersedia = j.status === 'tersedia';
+
+                        const cardStyle = tersedia
+                            ? `background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.35);`
+                            : `background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);opacity:0.65;`;
+
+                        const badge = tersedia
+                            ? `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.4);border-radius:20px;padding:2px 10px;font-size:0.72rem;font-weight:700;letter-spacing:0.04em;">
+                                <span style="width:6px;height:6px;border-radius:50%;background:#34d399;animation:pulse 1.5s infinite;flex-shrink:0;"></span>
+                                TERSEDIA
+                               </span>`
+                            : `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);border-radius:20px;padding:2px 10px;font-size:0.72rem;font-weight:700;letter-spacing:0.04em;">
+                                🔒 SUDAH DIPESAN
+                               </span>`;
+
+                        const actionBtn = tersedia
+                            ? `<button class="btn-book" style="width:auto;padding:0.45rem 1.2rem;font-size:0.85rem;background:var(--secondary);" onclick="pesanJadwal(${j.id})">Pesan</button>`
+                            : `<button disabled style="width:auto;padding:0.45rem 1.2rem;font-size:0.85rem;background:rgba(100,116,139,0.2);color:var(--text-muted);border:1px solid rgba(100,116,139,0.2);border-radius:8px;cursor:not-allowed;font-weight:600;">Tidak Tersedia</button>`;
+
+                        return `
+                        <div style="${cardStyle}padding:0.9rem 1rem;border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;transition:opacity 0.2s;">
+                            <div>
+                                <div style="margin-bottom:4px;">${badge}</div>
+                                <div style="font-weight:600;color:${tersedia ? 'var(--text-main)' : 'var(--text-muted)'};font-size:0.92rem;">${fmtTgl}</div>
+                                <div style="font-size:0.85rem;color:var(--text-muted);margin-top:2px;">🕐 ${jM} – ${jS}</div>
+                            </div>
+                            ${actionBtn}
+                        </div>`;
+                    }).join('');
+                } else {
+                    list.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:1rem;">Tidak ada jadwal tersedia untuk saat ini.</p>';
+                }
+            } catch {
+                document.getElementById('jadwalList').innerHTML = '<p style="color:#ef4444;text-align:center;">Gagal memuat jadwal.</p>';
+            }
+        }
+
+        async function pesanJadwal(jadwal_id) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/reservasi', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify({ jadwal_id: jadwal_id })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Reservasi berhasil! Silakan upload bukti pembayaran.', 'success');
+                    closeModal('jadwalModal');
+                    openPesanan();
+                } else {
+                    showToast(data.error || 'Gagal memesan.', 'error');
+                }
+            } catch { showToast('Terjadi kesalahan server.', 'error'); }
+        }
+
+        // ===== PESANAN =====
+        async function openPesanan() {
+            openModal('pesananModal');
+            document.getElementById('pesananList').innerHTML = '<div class="loader" style="display:block;">Memuat pesanan...</div>';
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/reservasi/user', { headers: { 'Authorization': 'Bearer ' + token } });
+                const result = await res.json();
+                const list = document.getElementById('pesananList');
+
+                if (result.data && result.data.length > 0) {
+                    list.innerHTML = result.data.map(r => {
+                        const statusColors = { lunas: '#10b981', pending: '#f59e0b', batal: '#ef4444', expired: '#ef4444' };
+                        const statusColor = statusColors[r.status] || '#94a3b8';
+                        const lapNama = r.Jadwal ? r.Jadwal.Lapangan.nama : 'Lapangan Terhapus';
+                        const jadwalInfo = r.Jadwal ? `${r.Jadwal.tanggal} (${r.Jadwal.jam_mulai.substring(0, 5)} - ${r.Jadwal.jam_selesai.substring(0, 5)})` : '';
+
+                        let actionSection = '';
+
+                        if (r.status === 'pending') {
+                            // Case 1: sudah kirim bukti, menunggu verifikasi admin
+                            if (r.Pembayaran && r.Pembayaran.status === 'verifikasi') {
+                                actionSection = `
+                                    <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px dashed rgba(255,255,255,0.1);">
+                                        <div style="background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:0.75rem;display:flex;align-items:flex-start;gap:10px;">
+                                            <span style="font-size:1.1rem;flex-shrink:0;">📤</span>
+                                            <div>
+                                                <div style="color:#38bdf8;font-weight:600;font-size:0.875rem;">Bukti Sudah Terkirim</div>
+                                                <div style="color:var(--text-muted);font-size:0.8rem;margin-top:2px;">Sedang menunggu verifikasi admin. Anda tidak dapat mengupload ulang sampai bukti ini dibatalkan.</div>
+                                                ${r.Pembayaran.no_whatsapp ? `<div style="color:var(--text-muted);font-size:0.78rem;margin-top:4px;">📱 WA terdaftar: <strong style="color:var(--text-main);">${r.Pembayaran.no_whatsapp}</strong></div>` : ''}
+                                            </div>
+                                        </div>
+                                        <div class="pesanan-actions">
+                                            <button type="button" class="btn-cancel-order" onclick="cancelBukti(${r.Pembayaran.id})" style="border-color:rgba(245,158,11,0.5);color:#f59e0b;">
+                                                ↩ Batalkan Pengiriman Bukti
+                                            </button>
+                                            <button type="button" class="btn-cancel-order" onclick="cancelPesanan(${r.id})">✕ Batalkan Pesanan</button>
+                                        </div>
+                                    </div>`;
+
+                                // Case 2: bukti ditolak admin, perlu upload ulang
+                            } else {
+                                const rejectedAlert = r.Pembayaran && r.Pembayaran.status === 'ditolak' ? `
+                                    <div class="rejected-alert">
+                                        <span class="icon">⚠️</span>
+                                        <div>
+                                            <div class="title">Pembayaran Ditolak</div>
+                                            <div class="desc">Bukti transfer Anda ditolak oleh admin. Silakan upload ulang bukti yang valid.</div>
+                                        </div>
+                                    </div>` : '';
+
+                                // Case 3: belum ada bukti atau sudah ditolak — tampilkan form upload
+                                actionSection = `
+                                    <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px dashed rgba(255,255,255,0.1);">
+                                        ${rejectedAlert}
+                                        <form onsubmit="uploadBukti(event, ${r.id})">
+                                            <div style="font-size:0.82rem;margin-bottom:6px;color:var(--text-muted);">Nomor WhatsApp (untuk konfirmasi):</div>
+                                            <input type="tel" id="wa-${r.id}" required placeholder="Contoh: 08123456789"
+                                                style="width:100%;padding:0.55rem 0.8rem;border-radius:7px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.25);color:white;font-size:0.88rem;outline:none;margin-bottom:8px;"
+                                                pattern="[0-9+\\s\\-]{8,16}" title="Masukkan nomor WA yang valid">
+                                            <div style="font-size:0.82rem;margin-bottom:6px;color:var(--text-muted);">Upload Bukti Pembayaran:</div>
+                                            <div class="file-input-wrapper">
+                                                <input type="file" id="bukti-${r.id}" required accept="image/*">
+                                            </div>
+                                            <div class="pesanan-actions">
+                                                <button type="submit" class="btn-upload">Kirim Bukti</button>
+                                                <button type="button" class="btn-cancel-order" onclick="cancelPesanan(${r.id})">✕ Batalkan</button>
+                                            </div>
+                                        </form>
+                                    </div>`;
+                            }
+
+                        } else if (r.status === 'lunas') {
+                            actionSection = `
+                                <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px dashed rgba(255,255,255,0.1);">
+                                    <div class="pesanan-actions">
+                                        <button type="button" class="btn-cancel-order" onclick="cancelPesanan(${r.id})">✕ Batalkan Pesanan</button>
+                                    </div>
+                                </div>`;
+                        }
+
+                        return `
+                        <div class="pesanan-item">
+                            <div class="pesanan-top">
+                                <strong>${lapNama}</strong>
+                                <span class="status-pill" style="background:${statusColor};">${r.status.toUpperCase()}</span>
+                            </div>
+                            <div class="pesanan-jadwal">${jadwalInfo}</div>
+                            ${actionSection}
+                        </div>`;
+                    }).join('');
+                } else {
+                    list.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:1rem;">Anda belum memiliki pesanan.</p>';
+                }
+            } catch {
+                document.getElementById('pesananList').innerHTML = '<p style="color:#ef4444;text-align:center;">Gagal memuat pesanan.</p>';
+            }
+        }
+
+        async function uploadBukti(e, reservasi_id) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const waInput = document.getElementById('wa-' + reservasi_id);
+            const noWa = waInput ? waInput.value.trim() : '';
+            if (!noWa) { showToast('Nomor WhatsApp wajib diisi sebelum upload bukti.', 'warning'); return; }
+            btn.innerText = 'Mengupload...'; btn.disabled = true;
+            const file = document.getElementById('bukti-' + reservasi_id).files[0];
+            const formData = new FormData();
+            formData.append('reservasi_id', reservasi_id);
+            formData.append('no_whatsapp', noWa);
+            formData.append('bukti', file);
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/upload-bukti', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message || 'Bukti berhasil dikirim, menunggu verifikasi.', 'success');
+                    openPesanan();
+                } else {
+                    showToast(data.error || 'Gagal upload bukti.', 'error');
+                    btn.innerText = 'Kirim Bukti'; btn.disabled = false;
+                }
+            } catch { showToast('Gagal upload bukti.', 'error'); btn.innerText = 'Kirim Bukti'; btn.disabled = false; }
+        }
+
+        async function cancelPesanan(id) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/reservasi/' + id + '/cancel', {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    if (data.need_refund && data.whatsapp) {
+                        showRefundModal(data.whatsapp, data.message);
+                    } else {
+                        showToast(data.message || 'Pesanan berhasil dibatalkan.', 'success');
+                        openPesanan();
+                    }
+                } else {
+                    showToast(data.error || 'Gagal membatalkan.', 'error');
+                }
+            } catch { showToast('Terjadi kesalahan server.', 'error'); }
+        }
+
+        async function cancelBukti(pembayaran_id) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/pembayaran/' + pembayaran_id + '/cancel', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast(data.message || 'Pengiriman bukti dibatalkan.', 'info');
+                    openPesanan();
+                } else {
+                    showToast(data.error || 'Gagal membatalkan bukti.', 'error');
+                }
+            } catch { showToast('Terjadi kesalahan server.', 'error'); }
+        }
+
+        function showRefundModal(wa, msg) {
+            // Close pesanan modal
+            closeModal('pesananModal');
+            // Create refund modal inline
+            const existing = document.getElementById('refundModal');
+            if (existing) existing.remove();
+
+            const waLink = `https://wa.me/${wa}?text=${encodeURIComponent('Halo admin Sportify, saya ingin melakukan refund untuk reservasi yang sudah saya batalkan. Mohon bantuannya.')}`;
+
+            const div = document.createElement('div');
+            div.id = 'refundModal';
+            div.className = 'modal';
+            div.style.display = 'flex';
+            div.innerHTML = `
+                <div class="modal-content" style="max-width:420px;text-align:center;">
+                    <div style="font-size:3rem;margin-bottom:1rem;">✅</div>
+                    <h3 style="margin-bottom:0.75rem;">Pesanan Dibatalkan</h3>
+                    <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1.5rem;">${msg}</p>
+                    <div class="refund-notice" style="text-align:left;">
+                        <h4>💚 Proses Refund</h4>
+                        <p>Hubungi admin melalui WhatsApp untuk mengurus pengembalian dana. Siapkan bukti pembayaran Anda.</p>
+                        <a href="${waLink}" target="_blank" class="btn-whatsapp">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            Hubungi Admin via WhatsApp
+                        </a>
+                    </div>
+                    <button class="btn-book" onclick="document.getElementById('refundModal').remove();openPesanan();" style="margin-top:1rem;background:var(--surface);">Lihat Pesanan</button>
+                </div>`;
+            div.onclick = function (e) { if (e.target === div) { div.remove(); openPesanan(); } };
+            document.body.appendChild(div);
+        }
+
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchLapangan();
+            checkAuth();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sportify Admin — Dashboard</title>
+    <meta name="description" content="Panel administrasi Sportify untuk manajemen lapangan, jadwal, pembayaran, dan reservasi olahraga.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --dark: #0f172a;
+            --darker: #080f1e;
+            --surface: #1e293b;
+            --surface2: #263348;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --border: rgba(255,255,255,0.08);
+            --sidebar-w: 250px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--darker); color: var(--text); min-height: 100vh; }
+
+        /* =============== LOGIN PAGE =============== */
+        #loginPage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at top, #0f2744 0%, var(--darker) 60%);
+            padding: 1rem;
+        }
+
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        }
+
+        .login-logo { text-align: center; margin-bottom: 2rem; }
+        .login-logo .brand { font-size: 2rem; font-weight: 700; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .login-logo p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+        .badge-admin {
+            display: inline-block;
+            background: rgba(14,165,233,0.15);
+            color: var(--primary);
+            border: 1px solid rgba(14,165,233,0.3);
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-top: 8px;
+        }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.5rem; font-weight: 500; }
+        .form-control {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.25);
+            color: var(--text);
+            outline: none;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            transition: border 0.3s, box-shadow 0.3s;
+        }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+        select.form-control option { background: var(--surface); color: var(--text); }
+        textarea.form-control { resize: vertical; min-height: 80px; }
+        .btn-primary {
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+            margin-top: 0.5rem;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(14,165,233,0.4); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        #loginError {
+            display: none;
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #fca5a5;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        /* =============== DASHBOARD =============== */
+        #dashboard { display: none; }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 49;
+        }
+        .sidebar-overlay.open { display: block; }
+
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0;
+            width: var(--sidebar-w);
+            height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 0;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand { padding: 0 1.5rem 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 0.5rem; }
+        .sidebar-brand .brand-name { font-size: 1.4rem; font-weight: 700; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sidebar-brand .brand-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+        .nav-section { padding: 0.5rem 1.5rem 0.25rem; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; margin-top: 0.5rem; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-left: 3px solid transparent;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+        .nav-item.active { background: rgba(14,165,233,0.1); color: var(--primary); border-left-color: var(--primary); }
+        .nav-item i { font-size: 1.15rem; flex-shrink: 0; }
+        .nav-badge { margin-left: auto; background: var(--danger); color: #fff; font-size: 0.65rem; font-weight: 700; padding: 1px 7px; border-radius: 10px; min-width: 18px; text-align: center; }
+
+        .sidebar-footer { margin-top: auto; padding: 1rem 1.5rem; border-top: 1px solid var(--border); flex-shrink: 0; }
+        .admin-info { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+        .admin-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+        .admin-name { font-size: 0.85rem; font-weight: 600; }
+        .admin-role { font-size: 0.72rem; color: var(--muted); }
+        .btn-logout { width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid rgba(239,68,68,0.3); background: transparent; color: #fca5a5; font-size: 0.85rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .btn-logout:hover { background: rgba(239,68,68,0.1); }
+
+        /* Mobile top bar */
+        .topbar {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 56px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            z-index: 48;
+            align-items: center;
+            padding: 0 1rem;
+            gap: 1rem;
+        }
+        .topbar-hamburger { display: flex; flex-direction: column; gap: 4px; cursor: pointer; padding: 4px; border: none; background: transparent; }
+        .topbar-hamburger span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; }
+        .topbar-brand { font-size: 1.1rem; font-weight: 700; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* Main area */
+        .main { margin-left: var(--sidebar-w); padding: 2rem; min-height: 100vh; }
+        .page-header { margin-bottom: 1.75rem; }
+        .page-header h1 { font-size: clamp(1.3rem, 3vw, 1.6rem); font-weight: 700; }
+        .page-header p { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.2rem 1.5rem; position: relative; overflow: hidden; }
+        .stat-card::before { content: ''; position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; border-radius: 50%; opacity: 0.08; }
+        .stat-card.blue::before  { background: var(--primary); }
+        .stat-card.green::before { background: var(--secondary); }
+        .stat-card.yellow::before{ background: var(--accent); }
+        .stat-card.red::before   { background: var(--danger); }
+        .stat-card.purple::before{ background: var(--purple); }
+        .stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; margin-bottom: 0.5rem; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; }
+        .stat-sub { font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
+        .stat-card.blue .stat-value   { color: var(--primary); }
+        .stat-card.green .stat-value  { color: var(--secondary); }
+        .stat-card.yellow .stat-value { color: var(--accent); }
+        .stat-card.red .stat-value    { color: var(--danger); }
+        .stat-card.purple .stat-value { color: var(--purple); }
+
+        /* Tabs */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Table */
+        .table-wrapper { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 1.5rem; }
+        .table-header { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+        .table-header h3 { font-size: 1rem; font-weight: 600; }
+        .table-header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-refresh { display: flex; align-items: center; gap: 6px; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 0.85rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .btn-refresh:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+        .btn-add { display: flex; align-items: center; gap: 6px; padding: 0.5rem 1rem; border-radius: 8px; border: none; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .btn-add:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(14,165,233,0.3); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        thead th { padding: 0.9rem 1.2rem; text-align: left; color: var(--muted); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.15); white-space: nowrap; }
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.2s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: rgba(255,255,255,0.03); }
+        tbody td { padding: 0.85rem 1.2rem; vertical-align: middle; }
+
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+        .badge-verifikasi  { background: rgba(245,158,11,0.15);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+        .badge-sudah_bayar { background: rgba(16,185,129,0.15);  color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .badge-ditolak     { background: rgba(239,68,68,0.15);   color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+        .badge-pending     { background: rgba(245,158,11,0.15);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+        .badge-lunas       { background: rgba(16,185,129,0.15);  color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .badge-batal       { background: rgba(239,68,68,0.15);   color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+        .badge-expired     { background: rgba(100,116,139,0.2);  color: var(--muted); border: 1px solid rgba(100,116,139,0.3); }
+        .badge-active      { background: rgba(16,185,129,0.15);  color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .badge-inactive    { background: rgba(239,68,68,0.15);   color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+        .badge-tersedia    { background: rgba(16,185,129,0.15);  color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .badge-dipesan     { background: rgba(14,165,233,0.15);  color: #38bdf8; border: 1px solid rgba(14,165,233,0.3); }
+        .badge-admin       { background: rgba(139,92,246,0.15);  color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+        .badge-user        { background: rgba(100,116,139,0.2);  color: var(--muted); border: 1px solid rgba(100,116,139,0.3); }
+
+        .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        .btn-sm { padding: 5px 12px; border-radius: 6px; border: none; font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+        .btn-approve { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .btn-approve:hover { background: rgba(16,185,129,0.3); }
+        .btn-reject  { background: rgba(239,68,68,0.1);   color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+        .btn-reject:hover  { background: rgba(239,68,68,0.25); }
+        .btn-preview { background: rgba(14,165,233,0.1);  color: #38bdf8; border: 1px solid rgba(14,165,233,0.3); }
+        .btn-preview:hover { background: rgba(14,165,233,0.25); }
+        .btn-edit    { background: rgba(245,158,11,0.1);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+        .btn-edit:hover    { background: rgba(245,158,11,0.25); }
+        .btn-delete  { background: rgba(239,68,68,0.1);   color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+        .btn-delete:hover  { background: rgba(239,68,68,0.25); }
+        .btn-toggle  { background: rgba(139,92,246,0.1);  color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+        .btn-toggle:hover  { background: rgba(139,92,246,0.25); }
+
+        .empty-row td { text-align: center; padding: 3rem; color: var(--muted); }
+        .loader-row td { text-align: center; padding: 2rem; color: var(--primary); }
+
+        /* Lapangan card thumbnail */
+        .lap-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: var(--surface2); flex-shrink: 0; }
+        .lap-thumb-placeholder { width: 44px; height: 44px; border-radius: 8px; background: var(--surface2); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.2rem; flex-shrink: 0; }
+        .lap-info { display: flex; align-items: center; gap: 10px; }
+        .lap-name { font-weight: 600; font-size: 0.875rem; }
+        .lap-cat { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+        /* Filter bar */
+        .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+        .filter-bar select, .filter-bar input { padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.85rem; font-family: 'Inter', sans-serif; outline: none; cursor: pointer; }
+        .filter-bar select:focus, .filter-bar input:focus { border-color: var(--primary); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            z-index: 9000;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 2rem 1rem;
+            overflow-y: auto;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 560px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            margin: auto;
+        }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+        .modal-header h2 { font-size: 1.1rem; font-weight: 700; }
+        .modal-close { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 1.3rem; padding: 4px; transition: color 0.2s; }
+        .modal-close:hover { color: var(--text); }
+        .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 1.5rem; }
+        .btn-cancel { padding: 0.65rem 1.2rem; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 0.9rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .btn-cancel:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+        .btn-submit { padding: 0.65rem 1.5rem; border-radius: 8px; border: none; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(14,165,233,0.3); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+        /* Image Preview Modal */
+        #previewModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .preview-inner { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 1.5rem; max-width: 600px; width: 100%; text-align: center; }
+        .preview-inner img { max-width: 100%; max-height: 65vh; border-radius: 8px; object-fit: contain; background: #000; }
+        .preview-title { font-weight: 600; margin-bottom: 1rem; }
+        .preview-footer { margin-top: 1rem; display: flex; justify-content: flex-end; }
+        .btn-close { padding: 0.5rem 1.2rem; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.875rem; transition: all 0.2s; }
+        .btn-close:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+        /* Toast */
+        #toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.5rem; font-size: 0.875rem; z-index: 99999; transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 10px 30px rgba(0,0,0,0.4); max-width: 320px; }
+        #toast.show { transform: translateY(0); opacity: 1; }
+        #toast.success { border-left: 4px solid var(--secondary); }
+        #toast.error   { border-left: 4px solid var(--danger); }
+        #toast.info    { border-left: 4px solid var(--primary); }
+
+        /* Revenue display */
+        .revenue-value { font-size: 1.4rem !important; }
+
+        /* Table scroll */
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        /* WhatsApp panel */
+        .wa-link { color: #25d366; font-size: 0.82rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+        .wa-link:hover { text-decoration: underline; }
+
+        /* Kategori pill colors */
+        .kat-futsal    { background: rgba(14,165,233,0.15); color: #38bdf8; }
+        .kat-badminton { background: rgba(16,185,129,0.15); color: #34d399; }
+        .kat-basket    { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .kat-tenis     { background: rgba(239,68,68,0.15);  color: #fca5a5; }
+        .kat-voli      { background: rgba(139,92,246,0.15); color: #a78bfa; }
+        .kat-default   { background: rgba(100,116,139,0.2); color: var(--muted); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; padding: 1.25rem; padding-top: calc(56px + 1.25rem); }
+            .topbar { display: flex; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 420px) {
+            .login-card { padding: 2rem 1.25rem; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+            .main { padding: 1rem; padding-top: calc(56px + 1rem); }
+            #toast { bottom: 1rem; right: 1rem; left: 1rem; max-width: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== LOGIN PAGE ===== -->
+    <div id="loginPage">
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="brand">Sportify.</div>
+                <p>Selamat datang kembali</p>
+                <span class="badge-admin">ADMIN PANEL</span>
+            </div>
+            <div id="loginError"></div>
+            <form id="loginForm" onsubmit="handleAdminLogin(event)">
+                <div class="form-group">
+                    <label>Email Admin</label>
+                    <input type="email" id="adminEmail" class="form-control" placeholder="admin@sportify.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="adminPassword" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                <button type="submit" id="btnAdminLogin" class="btn-primary">
+                    <i class="ph ph-sign-in"></i> Masuk ke Dashboard
+                </button>
+            </form>
+            <p style="text-align:center;margin-top:1.5rem;font-size:0.8rem;color:var(--muted);">
+                Bukan admin? <a href="/" style="color:var(--primary);text-decoration:none;">Kembali ke halaman utama</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ===== DASHBOARD ===== -->
+    <div id="dashboard">
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+        <!-- Mobile topbar -->
+        <div class="topbar">
+            <button class="topbar-hamburger" onclick="toggleSidebar()" aria-label="Buka menu">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="topbar-brand">Sportify Admin</div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-name">Sportify.</div>
+                <div class="brand-sub">Admin Dashboard</div>
+            </div>
+            <nav>
+                <div class="nav-section">Overview</div>
+                <div class="nav-item active" id="navDashboard" onclick="switchTab('dashboard');closeSidebar()">
+                    <i class="ph ph-squares-four"></i> Dashboard
+                </div>
+
+                <div class="nav-section">Konten</div>
+                <div class="nav-item" id="navLapangan" onclick="switchTab('lapangan');closeSidebar()">
+                    <i class="ph ph-soccer-ball"></i> Lapangan
+                </div>
+                <div class="nav-item" id="navJadwal" onclick="switchTab('jadwal');closeSidebar()">
+                    <i class="ph ph-calendar-plus"></i> Jadwal
+                </div>
+
+                <div class="nav-section">Transaksi</div>
+                <div class="nav-item" id="navPembayaran" onclick="switchTab('pembayaran');closeSidebar()">
+                    <i class="ph ph-receipt"></i> Pembayaran
+                    <span class="nav-badge" id="badgePembayaran" style="display:none">0</span>
+                </div>
+                <div class="nav-item" id="navReservasi" onclick="switchTab('reservasi');closeSidebar()">
+                    <i class="ph ph-calendar-check"></i> Semua Reservasi
+                </div>
+
+                <div class="nav-section">Manajemen</div>
+                <div class="nav-item" id="navUsers" onclick="switchTab('users');closeSidebar()">
+                    <i class="ph ph-users"></i> Pengguna
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="admin-info">
+                    <div class="admin-avatar" id="adminInitial">A</div>
+                    <div>
+                        <div class="admin-name" id="adminName">Admin</div>
+                        <div class="admin-role">Administrator</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="handleLogout()">
+                    <i class="ph ph-sign-out"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+
+            <!-- ===== TAB: DASHBOARD ===== -->
+            <div class="tab-content active" id="tabDashboard">
+                <div class="page-header">
+                    <h1>Selamat Datang, <span id="greetName">Admin</span> 👋</h1>
+                    <p>Ringkasan aktivitas platform Sportify hari ini</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card blue">
+                        <div class="stat-label">Total Reservasi</div>
+                        <div class="stat-value" id="statTotal">—</div>
+                        <div class="stat-sub">Semua waktu</div>
+                    </div>
+                    <div class="stat-card yellow">
+                        <div class="stat-label">Menunggu Verifikasi</div>
+                        <div class="stat-value" id="statPending">—</div>
+                        <div class="stat-sub">Perlu tindakan</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-label">Reservasi Lunas</div>
+                        <div class="stat-value" id="statLunas">—</div>
+                        <div class="stat-sub">Pembayaran terverifikasi</div>
+                    </div>
+                    <div class="stat-card red">
+                        <div class="stat-label">Dibatalkan / Expired</div>
+                        <div class="stat-value" id="statBatal">—</div>
+                        <div class="stat-sub">Tidak dilanjutkan</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-label">Lapangan Aktif</div>
+                        <div class="stat-value" id="statLapangan">—</div>
+                        <div class="stat-sub">Tersedia untuk booking</div>
+                    </div>
+                    <div class="stat-card blue">
+                        <div class="stat-label">Pengguna Terdaftar</div>
+                        <div class="stat-value" id="statUsers">—</div>
+                        <div class="stat-sub">Total member</div>
+                    </div>
+                </div>
+
+                <!-- Revenue card -->
+                <div class="table-wrapper" style="padding:1.5rem;margin-bottom:1.5rem;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                        <div>
+                            <div style="font-size:0.78rem;color:var(--muted);margin-bottom:4px;">ESTIMASI REVENUE BULAN INI</div>
+                            <div class="stat-value revenue-value" id="statRevenue" style="color:var(--secondary);">—</div>
+                        </div>
+                        <button class="btn-refresh" onclick="loadStats()"><i class="ph ph-arrows-clockwise"></i> Refresh</button>
+                    </div>
+                </div>
+
+                <!-- Quick actions -->
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+                    <div class="table-wrapper" style="padding:1.2rem;cursor:pointer;" onclick="switchTab('lapangan')">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div style="width:44px;height:44px;border-radius:12px;background:rgba(14,165,233,0.15);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--primary);flex-shrink:0;">
+                                <i class="ph ph-soccer-ball"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:600;font-size:0.9rem;">Kelola Lapangan</div>
+                                <div style="font-size:0.75rem;color:var(--muted);">Tambah & edit lapangan</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-wrapper" style="padding:1.2rem;cursor:pointer;" onclick="switchTab('jadwal')">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div style="width:44px;height:44px;border-radius:12px;background:rgba(16,185,129,0.15);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--secondary);flex-shrink:0;">
+                                <i class="ph ph-calendar-plus"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:600;font-size:0.9rem;">Buat Jadwal</div>
+                                <div style="font-size:0.75rem;color:var(--muted);">Atur slot waktu lapangan</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-wrapper" style="padding:1.2rem;cursor:pointer;" onclick="switchTab('pembayaran')">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div style="width:44px;height:44px;border-radius:12px;background:rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--accent);flex-shrink:0;">
+                                <i class="ph ph-receipt"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:600;font-size:0.9rem;">Verifikasi Pembayaran</div>
+                                <div style="font-size:0.75rem;color:var(--muted);">Cek bukti transfer</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-wrapper" style="padding:1.2rem;cursor:pointer;" onclick="switchTab('users')">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div style="width:44px;height:44px;border-radius:12px;background:rgba(139,92,246,0.15);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--purple);flex-shrink:0;">
+                                <i class="ph ph-users"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:600;font-size:0.9rem;">Kelola Pengguna</div>
+                                <div style="font-size:0.75rem;color:var(--muted);">Lihat & atur role user</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TAB: LAPANGAN ===== -->
+            <div class="tab-content" id="tabLapangan">
+                <div class="page-header">
+                    <h1>Manajemen Lapangan</h1>
+                    <p>Tambah, edit, dan kelola lapangan yang tersedia untuk disewakan</p>
+                </div>
+                <div class="table-wrapper">
+                    <div class="table-header">
+                        <h3>Daftar Lapangan</h3>
+                        <div class="table-header-actions">
+                            <button class="btn-refresh" onclick="loadLapangan()"><i class="ph ph-arrows-clockwise"></i> Refresh</button>
+                            <button class="btn-add" onclick="openLapanganModal()"><i class="ph ph-plus"></i> Tambah Lapangan</button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Lapangan</th>
+                                    <th>Kategori</th>
+                                    <th>Lokasi</th>
+                                    <th>Harga/Jam</th>
+                                    <th>Fasilitas</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lapanganBody">
+                                <tr class="loader-row"><td colspan="8">Memuat data lapangan...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TAB: JADWAL ===== -->
+            <div class="tab-content" id="tabJadwal">
+                <div class="page-header">
+                    <h1>Manajemen Jadwal</h1>
+                    <p>Atur slot waktu yang tersedia untuk setiap lapangan</p>
+                </div>
+
+                <div class="filter-bar">
+                    <select id="filterJadwalLapangan" onchange="loadJadwal()">
+                        <option value="">Semua Lapangan</option>
+                    </select>
+                    <input type="date" id="filterJadwalTanggal" onchange="loadJadwal()" placeholder="Filter tanggal">
+                    <button class="btn-refresh" onclick="loadJadwal()"><i class="ph ph-arrows-clockwise"></i></button>
+                </div>
+
+                <div class="table-wrapper">
+                    <div class="table-header">
+                        <h3>Daftar Jadwal</h3>
+                        <div class="table-header-actions">
+                            <button class="btn-refresh" onclick="openJadwalBulkModal()" style="border-color:rgba(16,185,129,0.3);color:var(--secondary);">
+                                <i class="ph ph-calendar-dots"></i> Buat Massal
+                            </button>
+                            <button class="btn-add" onclick="openJadwalModal()"><i class="ph ph-plus"></i> Tambah Jadwal</button>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Lapangan</th>
+                                    <th>Tanggal</th>
+                                    <th>Jam Mulai</th>
+                                    <th>Jam Selesai</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="jadwalBody">
+                                <tr class="loader-row"><td colspan="7">Memuat data jadwal...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TAB: PEMBAYARAN ===== -->
+            <div class="tab-content" id="tabPembayaran">
+                <div class="page-header">
+                    <h1>Verifikasi Pembayaran</h1>
+                    <p>Cek dan verifikasi bukti transfer dari pelanggan</p>
+                </div>
+                <div class="table-wrapper">
+                    <div class="table-header">
+                        <h3>Daftar Pembayaran Masuk</h3>
+                        <button class="btn-refresh" onclick="loadPembayaran()"><i class="ph ph-arrows-clockwise"></i> Refresh</button>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#ID</th>
+                                    <th>Pelanggan</th>
+                                    <th>Lapangan</th>
+                                    <th>Jadwal</th>
+                                    <th>WhatsApp</th>
+                                    <th>Status</th>
+                                    <th>Diunggah</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pembayaranBody">
+                                <tr class="loader-row"><td colspan="8">Memuat data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TAB: RESERVASI ===== -->
+            <div class="tab-content" id="tabReservasi">
+                <div class="page-header">
+                    <h1>Semua Reservasi</h1>
+                    <p>Riwayat seluruh pemesanan lapangan</p>
+                </div>
+                <div class="table-wrapper">
+                    <div class="table-header">
+                        <h3>Daftar Reservasi</h3>
+                        <button class="btn-refresh" onclick="loadReservasi()"><i class="ph ph-arrows-clockwise"></i> Refresh</button>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#ID</th>
+                                    <th>Pelanggan</th>
+                                    <th>Lapangan</th>
+                                    <th>Jadwal</th>
+                                    <th>Status</th>
+                                    <th>Dibuat</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reservasiBody">
+                                <tr class="loader-row"><td colspan="7">Memuat data reservasi...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TAB: USERS ===== -->
+            <div class="tab-content" id="tabUsers">
+                <div class="page-header">
+                    <h1>Manajemen Pengguna</h1>
+                    <p>Lihat semua user terdaftar dan atur hak akses mereka</p>
+                </div>
+                <div class="table-wrapper">
+                    <div class="table-header">
+                        <h3>Daftar Pengguna</h3>
+                        <button class="btn-refresh" onclick="loadUsers()"><i class="ph ph-arrows-clockwise"></i> Refresh</button>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nama</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Bergabung</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersBody">
+                                <tr class="loader-row"><td colspan="6">Memuat data pengguna...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ===== MODAL: LAPANGAN ===== -->
+    <div class="modal-overlay" id="modalLapangan" onclick="if(event.target===this)closeLapanganModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalLapanganTitle">Tambah Lapangan</h2>
+                <button class="modal-close" onclick="closeLapanganModal()"><i class="ph ph-x"></i></button>
+            </div>
+            <form id="formLapangan" onsubmit="submitLapangan(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nama Lapangan *</label>
+                        <input type="text" id="lapNama" class="form-control" placeholder="cth: Lapangan Futsal A" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori *</label>
+                        <select id="lapKategori" class="form-control" required>
+                            <option value="">Pilih kategori</option>
+                            <option value="Futsal">Futsal</option>
+                            <option value="Mini Soccer">Mini Soccer</option>
+                            <option value="Basket">Basket</option>
+                            <option value="Tenis">Tenis</option>
+                            <option value="Padel">Padel</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Lokasi / Alamat *</label>
+                    <input type="text" id="lapLokasi" class="form-control" placeholder="cth: Gedung Olahraga Lt.2, Jl. Merdeka No.10" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Harga per Jam (Rp) *</label>
+                        <input type="number" id="lapHarga" class="form-control" placeholder="cth: 80000" min="0" step="1000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="lapStatus" class="form-control">
+                            <option value="active">Aktif</option>
+                            <option value="inactive">Nonaktif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi Lapangan</label>
+                    <textarea id="lapDeskripsi" class="form-control" rows="3" placeholder="Deskripsikan lapangan secara singkat..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Fasilitas</label>
+                    <input type="text" id="lapFasilitas" class="form-control" placeholder="cth: Parkir, Toilet, Kantin, AC, Tribun">
+                </div>
+                <div class="form-group">
+                    <label>Upload Gambar Lapangan</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="lapGambar" class="form-control" accept="image/*" style="padding-top: 0.6rem;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeLapanganModal()">Batal</button>
+                    <button type="submit" class="btn-submit" id="btnSubmitLapangan"><i class="ph ph-floppy-disk"></i> Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: JADWAL ===== -->
+    <div class="modal-overlay" id="modalJadwal" onclick="if(event.target===this)closeJadwalModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalJadwalTitle">Tambah Jadwal</h2>
+                <button class="modal-close" onclick="closeJadwalModal()"><i class="ph ph-x"></i></button>
+            </div>
+            <form id="formJadwal" onsubmit="submitJadwal(event)">
+                <div class="form-group">
+                    <label>Lapangan *</label>
+                    <select id="jadwalLapangan" class="form-control" required>
+                        <option value="">Pilih lapangan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tanggal *</label>
+                    <input type="date" id="jadwalTanggal" class="form-control" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Jam Mulai *</label>
+                        <input type="time" id="jadwalMulai" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jam Selesai *</label>
+                        <input type="time" id="jadwalSelesai" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="jadwalStatus" class="form-control">
+                        <option value="tersedia">Tersedia</option>
+                        <option value="dipesan">Dipesan</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeJadwalModal()">Batal</button>
+                    <button type="submit" class="btn-submit" id="btnSubmitJadwal"><i class="ph ph-floppy-disk"></i> Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL: JADWAL BULK ===== -->
+    <div class="modal-overlay" id="modalJadwalBulk" onclick="if(event.target===this)closeJadwalBulkModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Buat Jadwal Massal</h2>
+                <button class="modal-close" onclick="closeJadwalBulkModal()"><i class="ph ph-x"></i></button>
+            </div>
+            <form id="formJadwalBulk" onsubmit="submitJadwalBulk(event)">
+                <div class="form-group">
+                    <label>Lapangan *</label>
+                    <select id="bulkLapangan" class="form-control" required>
+                        <option value="">Pilih lapangan</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tanggal Mulai *</label>
+                        <input type="date" id="bulkTanggalMulai" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tanggal Selesai *</label>
+                        <input type="date" id="bulkTanggalSelesai" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Jam Mulai *</label>
+                        <input type="time" id="bulkJamMulai" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jam Selesai *</label>
+                        <input type="time" id="bulkJamSelesai" class="form-control" required>
+                    </div>
+                </div>
+                <p style="font-size:0.8rem;color:var(--muted);margin-top:-0.5rem;margin-bottom:0.75rem;">
+                    <i class="ph ph-info"></i> Akan dibuat 1 slot jadwal per hari dalam rentang tanggal tersebut.
+                </p>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeJadwalBulkModal()">Batal</button>
+                    <button type="submit" class="btn-submit" id="btnSubmitBulk"><i class="ph ph-calendar-dots"></i> Buat Jadwal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="previewModal" onclick="if(event.target===this)closePreview()">
+        <div class="preview-inner">
+            <div class="preview-title">Bukti Transfer</div>
+            <img id="previewImg" src="" alt="Bukti Transfer">
+            <div class="preview-footer">
+                <button class="btn-close" onclick="closePreview()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <script>
+        const API = '/api/admin';
+        let adminToken = localStorage.getItem('adminToken');
+        let adminUser = JSON.parse(localStorage.getItem('adminUser') || 'null');
+        let editingLapanganId = null;
+        let editingJadwalId = null;
+        let allLapangan = [];
+
+        // ======= SIDEBAR (MOBILE) =======
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('open');
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('open');
+        }
+
+        // ======= INIT =======
+        window.addEventListener('DOMContentLoaded', () => {
+            if (adminToken && adminUser && adminUser.role === 'admin') {
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        });
+
+        function showLogin() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+
+        function showDashboard() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('adminName').textContent = adminUser.name;
+            document.getElementById('greetName').textContent = adminUser.name.split(' ')[0];
+            document.getElementById('adminInitial').textContent = adminUser.name.charAt(0).toUpperCase();
+            loadStats();
+            loadLapanganForSelects();
+        }
+
+        // ======= LOGIN =======
+        async function handleAdminLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnAdminLogin');
+            const errEl = document.getElementById('loginError');
+            errEl.style.display = 'none';
+            btn.textContent = 'Memproses...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('adminEmail').value,
+                        password: document.getElementById('adminPassword').value
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) { errEl.textContent = data.error || 'Login gagal.'; errEl.style.display = 'block'; return; }
+                if (data.user.role !== 'admin') { errEl.textContent = 'Akun ini bukan admin.'; errEl.style.display = 'block'; return; }
+                adminToken = data.token;
+                adminUser = data.user;
+                localStorage.setItem('adminToken', adminToken);
+                localStorage.setItem('adminUser', JSON.stringify(adminUser));
+                showDashboard();
+            } catch {
+                errEl.textContent = 'Tidak dapat terhubung ke server.';
+                errEl.style.display = 'block';
+            } finally {
+                btn.textContent = 'Masuk ke Dashboard';
+                btn.disabled = false;
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
+            adminToken = null; adminUser = null;
+            showLogin();
+        }
+
+        // ======= TABS =======
+        const tabLoaders = {
+            dashboard: () => loadStats(),
+            lapangan: () => loadLapangan(),
+            jadwal: () => loadJadwal(),
+            pembayaran: () => loadPembayaran(),
+            reservasi: () => loadReservasi(),
+            users: () => loadUsers(),
+        };
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const key = tab.charAt(0).toUpperCase() + tab.slice(1);
+            document.getElementById('tab' + key)?.classList.add('active');
+            document.getElementById('nav' + key)?.classList.add('active');
+            if (tabLoaders[tab]) tabLoaders[tab]();
+        }
+
+        // ======= STATS =======
+        async function loadStats() {
+            try {
+                const [rRes, sRes] = await Promise.all([
+                    fetch(`${API}/reservasi`, { headers: { 'Authorization': 'Bearer ' + adminToken } }),
+                    fetch(`${API}/stats`, { headers: { 'Authorization': 'Bearer ' + adminToken } }),
+                ]);
+                const rData = (await rRes.json()).data || [];
+                document.getElementById('statTotal').textContent = rData.length;
+                document.getElementById('statPending').textContent = rData.filter(r => r.status === 'pending').length;
+                document.getElementById('statLunas').textContent = rData.filter(r => r.status === 'lunas').length;
+                document.getElementById('statBatal').textContent = rData.filter(r => r.status === 'batal' || r.status === 'expired').length;
+
+                if (sRes.ok) {
+                    const s = await sRes.json();
+                    document.getElementById('statLapangan').textContent = s.lapangan_aktif ?? '—';
+                    document.getElementById('statUsers').textContent = s.total_user ?? '—';
+                    const revenue = s.revenue_bulan_ini ?? 0;
+                    document.getElementById('statRevenue').textContent = 'Rp ' + revenue.toLocaleString('id-ID');
+                    // Badge pembayaran pending
+                    const pending = s.pending_pembayaran ?? 0;
+                    const badge = document.getElementById('badgePembayaran');
+                    if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline-block'; }
+                    else { badge.style.display = 'none'; }
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        // ======= LAPANGAN =======
+        async function loadLapanganForSelects() {
+            try {
+                const res = await fetch('/api/lapangan', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                const data = (await res.json()).data || [];
+                allLapangan = data;
+                ['jadwalLapangan','bulkLapangan','filterJadwalLapangan'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const firstOption = el.options[0]?.outerHTML || '';
+                    el.innerHTML = firstOption + data.map(l => `<option value="${l.id}">${l.nama}</option>`).join('');
+                });
+            } catch(e) {}
+        }
+
+        async function loadLapangan() {
+            const tbody = document.getElementById('lapanganBody');
+            tbody.innerHTML = '<tr class="loader-row"><td colspan="8">Memuat data lapangan...</td></tr>';
+            try {
+                const res = await fetch('/api/lapangan', { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                const data = (await res.json()).data || [];
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr class="empty-row"><td colspan="8"><i class="ph ph-soccer-ball" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>Belum ada lapangan. Tambahkan lapangan pertama!</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(l => {
+                    const thumb = l.gambar_url
+                        ? `<img src="${l.gambar_url}" class="lap-thumb" onerror="this.style.display='none'">`
+                        : `<div class="lap-thumb-placeholder"><i class="ph ph-image"></i></div>`;
+                    const kat = l.kategori || 'lainnya';
+                    const katClass = ['futsal','badminton','basket','tenis','voli'].includes(kat) ? `kat-${kat}` : 'kat-default';
+                    return `<tr>
+                        <td style="color:var(--muted);">#${l.id}</td>
+                        <td><div class="lap-info">${thumb}<div><div class="lap-name">${l.nama}</div><div class="lap-cat">${l.deskripsi ? l.deskripsi.substring(0,40)+'…' : '—'}</div></div></div></td>
+                        <td><span class="badge ${katClass}" style="border-radius:6px;padding:4px 10px;">${kat}</span></td>
+                        <td style="font-size:0.82rem;color:var(--muted);">${l.lokasi || '—'}</td>
+                        <td style="font-weight:600;">Rp ${Number(l.harga_per_jam).toLocaleString('id-ID')}</td>
+                        <td style="font-size:0.78rem;color:var(--muted);max-width:160px;">${l.fasilitas || '—'}</td>
+                        <td><span class="badge badge-${l.status}">${l.status}</span></td>
+                        <td><div class="action-btns">
+                            <button class="btn-sm btn-edit" onclick="openLapanganModal(${l.id})"><i class="ph ph-pencil"></i> Edit</button>
+                            <button class="btn-sm btn-toggle" onclick="toggleLapangan(${l.id}, '${l.status}')">${l.status==='active'?'Nonaktifkan':'Aktifkan'}</button>
+                            <button class="btn-sm btn-delete" onclick="deleteLapangan(${l.id})"><i class="ph ph-trash"></i></button>
+                        </div></td>
+                    </tr>`;
+                }).join('');
+                allLapangan = data;
+                loadLapanganForSelects();
+            } catch {
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="8" style="color:#fca5a5;">Gagal memuat data. Coba refresh.</td></tr>';
+            }
+        }
+
+        function openLapanganModal(id = null) {
+            editingLapanganId = id;
+            document.getElementById('modalLapanganTitle').textContent = id ? 'Edit Lapangan' : 'Tambah Lapangan';
+            document.getElementById('formLapangan').reset();
+            if (id) {
+                const lap = allLapangan.find(l => l.id === id);
+                if (lap) {
+                    document.getElementById('lapNama').value = lap.nama || '';
+                    document.getElementById('lapKategori').value = lap.kategori || '';
+                    document.getElementById('lapLokasi').value = lap.lokasi || '';
+                    document.getElementById('lapHarga').value = lap.harga_per_jam || '';
+                    document.getElementById('lapStatus').value = lap.status || 'active';
+                    document.getElementById('lapDeskripsi').value = lap.deskripsi || '';
+                    document.getElementById('lapFasilitas').value = lap.fasilitas || '';
+                    document.getElementById('lapGambar').value = ''; // Reset file input
+                }
+            }
+            document.getElementById('modalLapangan').classList.add('open');
+        }
+        function closeLapanganModal() {
+            document.getElementById('modalLapangan').classList.remove('open');
+            editingLapanganId = null;
+        }
+
+        async function submitLapangan(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitLapangan');
+            btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+            const formData = new FormData();
+            formData.append('nama', document.getElementById('lapNama').value);
+            formData.append('kategori', document.getElementById('lapKategori').value);
+            formData.append('lokasi', document.getElementById('lapLokasi').value);
+            formData.append('harga_per_jam', document.getElementById('lapHarga').value);
+            formData.append('status', document.getElementById('lapStatus').value);
+            formData.append('deskripsi', document.getElementById('lapDeskripsi').value);
+            formData.append('fasilitas', document.getElementById('lapFasilitas').value);
+
+            const fileInput = document.getElementById('lapGambar');
+            if (fileInput.files.length > 0) {
+                formData.append('gambar', fileInput.files[0]);
+            }
+
+            const url = editingLapanganId ? `${API}/lapangan/${editingLapanganId}` : `${API}/lapangan`;
+            const method = editingLapanganId ? 'PUT' : 'POST';
+            try {
+                const res = await fetch(url, { 
+                    method, 
+                    headers: { 'Authorization': 'Bearer ' + adminToken }, 
+                    body: formData 
+                });
+                const data = await res.json();
+                showToast(res.ok ? data.message : (data.error || 'Gagal menyimpan'), res.ok ? 'success' : 'error');
+                if (res.ok) { closeLapanganModal(); loadLapangan(); loadStats(); }
+            } catch { showToast('Gagal terhubung ke server', 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan'; }
+        }
+
+        async function toggleLapangan(id, currentStatus) {
+            const action = currentStatus === 'active' ? 'menonaktifkan' : 'mengaktifkan';
+            if (!confirm(`Yakin ingin ${action} lapangan ini?`)) return;
+            try {
+                const res = await fetch(`${API}/lapangan/${id}/toggle-status`, { method: 'PATCH', headers: { 'Authorization': 'Bearer ' + adminToken } });
+                const data = await res.json();
+                showToast(res.ok ? data.message : data.error, res.ok ? 'success' : 'error');
+                if (res.ok) { loadLapangan(); loadStats(); }
+            } catch { showToast('Gagal terhubung ke server', 'error'); }
+        }
+
+        async function deleteLapangan(id) {
+            if (!confirm('Hapus lapangan ini secara permanen? Pastikan semua jadwal sudah dihapus.')) return;
+            try {
+                const res = await fetch(`${API}/lapangan/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + adminToken } });
+                const data = await res.json();
+                showToast(res.ok ? data.message : data.error, res.ok ? 'success' : 'error');
+                if (res.ok) { loadLapangan(); loadStats(); }
+            } catch { showToast('Gagal terhubung ke server', 'error'); }
+        }
+
+        // ======= JADWAL =======
+        async function loadJadwal() {
+            const tbody = document.getElementById('jadwalBody');
+            tbody.innerHTML = '<tr class="loader-row"><td colspan="7">Memuat data jadwal...</td></tr>';
+            const lapId = document.getElementById('filterJadwalLapangan')?.value || '';
+            const tgl   = document.getElementById('filterJadwalTanggal')?.value || '';
+            let url = `${API}/jadwal`;
+            const params = [];
+            if (lapId) params.push(`lapangan_id=${lapId}`);
+            if (tgl)   params.push(`tanggal=${tgl}`);
+            if (params.length) url += '?' + params.join('&');
+            try {
+                const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                const data = (await res.json()).data || [];
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="ph ph-calendar-x" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>Belum ada jadwal</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(j => {
+                    const lapNama = j.Lapangan ? j.Lapangan.nama : `Lapangan #${j.lapangan_id}`;
+                    const canEdit = j.status !== 'dipesan';
+                    return `<tr>
+                        <td style="color:var(--muted);">#${j.id}</td>
+                        <td style="font-weight:500;">${lapNama}</td>
+                        <td>${j.tanggal}</td>
+                        <td>${j.jam_mulai ? j.jam_mulai.substring(0,5) : '—'}</td>
+                        <td>${j.jam_selesai ? j.jam_selesai.substring(0,5) : '—'}</td>
+                        <td><span class="badge badge-${j.status}">${j.status}</span></td>
+                        <td><div class="action-btns">
+                            ${canEdit ? `<button class="btn-sm btn-edit" onclick="openJadwalModal(${j.id})"><i class="ph ph-pencil"></i> Edit</button>` : ''}
+                            ${canEdit ? `<button class="btn-sm btn-delete" onclick="deleteJadwal(${j.id})"><i class="ph ph-trash"></i></button>` : `<span style="color:var(--muted);font-size:0.78rem;">Dipesan</span>`}
+                        </div></td>
+                    </tr>`;
+                }).join('');
+            } catch {
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="7" style="color:#fca5a5;">Gagal memuat data. Coba refresh.</td></tr>';
+            }
+        }
+
+        function openJadwalModal(id = null) {
+            editingJadwalId = id;
+            document.getElementById('modalJadwalTitle').textContent = id ? 'Edit Jadwal' : 'Tambah Jadwal';
+            document.getElementById('formJadwal').reset();
+            // Set min date tomorrow
+            document.getElementById('jadwalTanggal').min = new Date().toISOString().split('T')[0];
+            if (id) {
+                // Populate from existing data if available
+                fetch(`${API}/jadwal?lapangan_id=`, { headers: { 'Authorization': 'Bearer ' + adminToken } })
+                    .catch(() => {});
+            }
+            document.getElementById('modalJadwal').classList.add('open');
+        }
+        function closeJadwalModal() {
+            document.getElementById('modalJadwal').classList.remove('open');
+            editingJadwalId = null;
+        }
+
+        async function submitJadwal(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitJadwal');
+            const mulai = document.getElementById('jadwalMulai').value;
+            const selesai = document.getElementById('jadwalSelesai').value;
+            if (mulai >= selesai) { showToast('Jam selesai harus lebih akhir dari jam mulai', 'error'); return; }
+            btn.disabled = true; btn.textContent = 'Menyimpan...';
+            const body = {
+                lapangan_id: parseInt(document.getElementById('jadwalLapangan').value),
+                tanggal: document.getElementById('jadwalTanggal').value,
+                jam_mulai: mulai + ':00',
+                jam_selesai: selesai + ':00',
+                status: document.getElementById('jadwalStatus').value,
+            };
+            const url = editingJadwalId ? `${API}/jadwal/${editingJadwalId}` : `${API}/jadwal`;
+            const method = editingJadwalId ? 'PUT' : 'POST';
+            try {
+                const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, body: JSON.stringify(body) });
+                const data = await res.json();
+                showToast(res.ok ? data.message : (data.error || 'Gagal menyimpan'), res.ok ? 'success' : 'error');
+                if (res.ok) { closeJadwalModal(); loadJadwal(); }
+            } catch { showToast('Gagal terhubung ke server', 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan'; }
+        }
+
+        async function deleteJadwal(id) {
+            if (!confirm('Hapus jadwal ini?')) return;
+            try {
+                const res = await fetch(`${API}/jadwal/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + adminToken } });
+                const data = await res.json();
+                showToast(res.ok ? data.message : data.error, res.ok ? 'success' : 'error');
+                if (res.ok) loadJadwal();
+            } catch { showToast('Gagal terhubung ke server', 'error'); }
+        }
+
+        // Bulk jadwal
+        function openJadwalBulkModal() { document.getElementById('modalJadwalBulk').classList.add('open'); }
+        function closeJadwalBulkModal() { document.getElementById('modalJadwalBulk').classList.remove('open'); }
+
+        async function submitJadwalBulk(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitBulk');
+            const startDate = new Date(document.getElementById('bulkTanggalMulai').value);
+            const endDate   = new Date(document.getElementById('bulkTanggalSelesai').value);
+            if (endDate < startDate) { showToast('Tanggal selesai harus setelah tanggal mulai', 'error'); return; }
+            const tanggals = [];
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                tanggals.push(d.toISOString().split('T')[0]);
+            }
+            if (tanggals.length > 60) { showToast('Maksimal 60 hari sekaligus', 'error'); return; }
+            btn.disabled = true; btn.textContent = `Membuat ${tanggals.length} jadwal...`;
+            const mulai   = document.getElementById('bulkJamMulai').value;
+            const selesai = document.getElementById('bulkJamSelesai').value;
+            if (mulai >= selesai) { showToast('Jam selesai harus lebih akhir dari jam mulai', 'error'); btn.disabled = false; btn.innerHTML = '<i class="ph ph-calendar-dots"></i> Buat Jadwal'; return; }
+            const body = {
+                lapangan_id: parseInt(document.getElementById('bulkLapangan').value),
+                tanggals,
+                jam_mulai: mulai + ':00',
+                jam_selesai: selesai + ':00',
+            };
+            try {
+                const res = await fetch(`${API}/jadwal/bulk`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, body: JSON.stringify(body) });
+                const data = await res.json();
+                showToast(`${data.message} (${data.created} berhasil, ${data.failed} gagal)`, res.ok ? 'success' : 'error');
+                if (res.ok) { closeJadwalBulkModal(); loadJadwal(); }
+            } catch { showToast('Gagal terhubung ke server', 'error'); }
+            finally { btn.disabled = false; btn.innerHTML = '<i class="ph ph-calendar-dots"></i> Buat Jadwal'; }
+        }
+
+        // ======= PEMBAYARAN =======
+        async function loadPembayaran() {
+            const tbody = document.getElementById('pembayaranBody');
+            tbody.innerHTML = '<tr class="loader-row"><td colspan="8">Memuat data pembayaran...</td></tr>';
+            try {
+                const res = await fetch(`${API}/pembayaran`, { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                const data = (await res.json()).data || [];
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr class="empty-row"><td colspan="8"><i class="ph ph-receipt" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>Belum ada data pembayaran</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(p => {
+                    const user   = p.Reservasi && p.Reservasi.User ? p.Reservasi.User.name : '—';
+                    const lap    = p.Reservasi && p.Reservasi.Jadwal && p.Reservasi.Jadwal.Lapangan ? p.Reservasi.Jadwal.Lapangan.nama : '—';
+                    const jadwal = p.Reservasi && p.Reservasi.Jadwal
+                        ? `${p.Reservasi.Jadwal.tanggal} ${p.Reservasi.Jadwal.jam_mulai ? p.Reservasi.Jadwal.jam_mulai.substring(0,5) : ''} – ${p.Reservasi.Jadwal.jam_selesai ? p.Reservasi.Jadwal.jam_selesai.substring(0,5) : ''}`
+                        : '—';
+                    const uploaded = p.created_at ? new Date(p.created_at).toLocaleString('id-ID') : '—';
+                    const previewBtn = p.bukti_transfer
+                        ? `<button class="btn-sm btn-preview" onclick="previewBukti('${p.bukti_transfer}')"><i class="ph ph-image"></i> Lihat</button>`
+                        : `<span style="color:var(--muted);font-size:0.8rem;">Tidak ada file</span>`;
+                    const actionBtns = p.status === 'verifikasi'
+                        ? `<button class="btn-sm btn-approve" onclick="approvePembayaran(${p.id})"><i class="ph ph-check-circle"></i> Verifikasi</button>
+                           <button class="btn-sm btn-reject" onclick="rejectPembayaran(${p.id})"><i class="ph ph-x-circle"></i> Tolak</button>`
+                        : '';
+                    const waNum = p.no_whatsapp ? p.no_whatsapp.replace(/[^0-9]/g, '') : '';
+                    const waCell = p.no_whatsapp
+                        ? `<a href="https://wa.me/${waNum.startsWith('0') ? '62' + waNum.slice(1) : waNum}" target="_blank" class="wa-link">
+                               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                               ${p.no_whatsapp}</a>`
+                        : `<span style="color:var(--muted);font-size:0.8rem;">—</span>`;
+                    return `<tr>
+                        <td style="color:var(--muted);">#${p.id}</td>
+                        <td>${user}</td>
+                        <td>${lap}</td>
+                        <td style="font-size:0.82rem;color:var(--muted);">${jadwal}</td>
+                        <td>${waCell}</td>
+                        <td><span class="badge badge-${p.status}">${p.status}</span></td>
+                        <td style="font-size:0.82rem;color:var(--muted);">${uploaded}</td>
+                        <td><div class="action-btns">${previewBtn}${actionBtns}</div></td>
+                    </tr>`;
+                }).join('');
+            } catch {
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="8" style="color:#fca5a5;">Gagal memuat data. Coba refresh.</td></tr>';
+            }
+        }
+
+        async function approvePembayaran(id) {
+            if (!confirm('Verifikasi pembayaran ini?')) return;
+            try {
+                const res = await fetch(`${API}/verifikasi`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken }, body: JSON.stringify({ pembayaran_id: id }) });
+                const data = await res.json();
+                showToast(res.ok ? data.message : data.error, res.ok ? 'success' : 'error');
+                if (res.ok) { loadPembayaran(); loadStats(); }
+            } catch { showToast('Gagal terhubung ke server', 'error'); }
+        }
+
+        async function rejectPembayaran(id) {
+            if (!confirm('Tolak pembayaran ini? User akan bisa mengupload ulang bukti.')) return;
+            try {
+                const res = await fetch(`${API}/verifikasi/${id}/tolak`, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + adminToken } });
+                const data = await res.json();
+                showToast(res.ok ? data.message : data.error, res.ok ? 'success' : 'error');
+                if (res.ok) { loadPembayaran(); loadStats(); }
+            } catch { showToast('Gagal terhubung ke server', 'error'); }
+        }
+
+        // ======= RESERVASI =======
+        async function loadReservasi() {
+            const tbody = document.getElementById('reservasiBody');
+            tbody.innerHTML = '<tr class="loader-row"><td colspan="7">Memuat data reservasi...</td></tr>';
+            try {
+                const res = await fetch(`${API}/reservasi`, { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                const data = (await res.json()).data || [];
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="ph ph-calendar-x" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>Belum ada reservasi</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(r => {
+                    const user    = r.User ? r.User.name : '—';
+                    const lap     = r.Jadwal && r.Jadwal.Lapangan ? r.Jadwal.Lapangan.nama : '—';
+                    const jadwal  = r.Jadwal ? `${r.Jadwal.tanggal} ${r.Jadwal.jam_mulai ? r.Jadwal.jam_mulai.substring(0,5) : ''}` : '—';
+                    const created = r.created_at ? new Date(r.created_at).toLocaleString('id-ID') : '—';
+                    const canCancel = r.status === 'pending' || r.status === 'lunas';
+                    const cancelBtn = canCancel
+                        ? `<button class="btn-sm btn-reject" onclick="cancelReservasiAdmin(${r.id})"><i class="ph ph-x-circle"></i> Batalkan</button>`
+                        : '';
+                    return `<tr>
+                        <td style="color:var(--muted);">#${r.id}</td>
+                        <td>${user}</td>
+                        <td>${lap}</td>
+                        <td style="font-size:0.82rem;color:var(--muted);">${jadwal}</td>
+                        <td><span class="badge badge-${r.status}">${r.status}</span></td>
+                        <td style="font-size:0.82rem;color:var(--muted);">${created}</td>
+                        <td><div class="action-btns">${cancelBtn}</div></td>
+                    </tr>`;
+                }).join('');
+            } catch {
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="7" style="color:#fca5a5;">Gagal memuat data. Coba refresh.</td></tr>';
+            }
+        }
+
+        async function cancelReservasiAdmin(id) {
+            if (!confirm('Batalkan reservasi ini?')) return;
+            try {
+                const res = await fetch(`${API}/reservasi/${id}/cancel`, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + adminToken } });
+                const data = await res.json();
+                if (res.ok) {
+                    if (data.need_refund && data.whatsapp) {
+                        const waLink = `https://wa.me/${data.whatsapp}?text=${encodeURIComponent('Halo, ada pembatalan reservasi #' + id + ' yang sudah lunas. Mohon diproses refundnya.')}`;
+                        showToast('✅ Dibatalkan. Perlu proses refund.', 'success');
+                        setTimeout(() => {
+                            if (confirm('Reservasi dibatalkan. Perlu proses refund.\n\nBuka WhatsApp untuk menghubungi pelanggan?')) {
+                                window.open(waLink, '_blank');
+                            }
+                        }, 400);
+                    } else {
+                        showToast(data.message || 'Reservasi berhasil dibatalkan', 'success');
+                    }
+                    loadReservasi(); loadStats();
+                } else {
+                    showToast(data.error || 'Gagal membatalkan', 'error');
+                }
+            } catch { showToast('Gagal terhubung ke server', 'error'); }
+        }
+
+        // ======= USERS =======
+        async function loadUsers() {
+            const tbody = document.getElementById('usersBody');
+            tbody.innerHTML = '<tr class="loader-row"><td colspan="6">Memuat data pengguna...</td></tr>';
+            try {
+                const res = await fetch(`${API}/users`, { headers: { 'Authorization': 'Bearer ' + adminToken } });
+                const data = (await res.json()).data || [];
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Belum ada pengguna terdaftar</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.map(u => {
+                    const joined = u.created_at ? new Date(u.created_at).toLocaleString('id-ID') : '—';
+                    const initial = u.name ? u.name.charAt(0).toUpperCase() : '?';
+                    const isSelf = adminUser && u.id === adminUser.id;
+                    const roleToggleBtn = !isSelf
+                        ? `<button class="btn-sm btn-toggle" onclick="toggleUserRole(${u.id}, '${u.role}')">${u.role === 'admin' ? 'Jadikan User' : 'Jadikan Admin'}</button>`
+                        : `<span style="color:var(--muted);font-size:0.78rem;">Ini Kamu</span>`;
+                    return `<tr>
+                        <td style="color:var(--muted);">#${u.id}</td>
+                        <td><div style="display:flex;align-items:center;gap:10px;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;">${initial}</div>
+                            <span style="font-weight:500;">${u.name}</span>
+                        </div></td>
+                        <td style="color:var(--muted);font-size:0.85rem;">${u.email}</td>
+                        <td><span class="badge badge-${u.role}">${u.role}</span></td>
+                        <td style="font-size:0.82rem;color:var(--muted);">${joined}</td>
+                        <td><div class="action-btns">${roleToggleBtn}</div></td>
+                    </tr>`;
+                }).join('');
+            } catch {
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="6" style="color:#fca5a5;">Gagal memuat data. Coba refresh.</td></tr>';
+            }
+        }
+
+        async function toggleUserRole(id, currentRole) {
+            const newRole = currentRole === 'admin' ? 'user' : 'admin';
+            if (!confirm(`Ubah role user ini menjadi "${newRole}"?`)) return;
+            try {
+                const res = await fetch(`${API}/users/${id}/role`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken },
+                    body: JSON.stringify({ role: newRole })
+                });
+                const data = await res.json();
+                showToast(res.ok ? data.message : data.error, res.ok ? 'success' : 'error');
+                if (res.ok) loadUsers();
+            } catch { showToast('Gagal terhubung ke server', 'error'); }
+        }
+
+        // ======= IMAGE PREVIEW =======
+        function previewBukti(path) {
+            const cleanPath = path.replace(/\\/g, '/').replace(/^\/+/, '');
+            document.getElementById('previewImg').src = '/' + cleanPath;
+            document.getElementById('previewModal').style.display = 'flex';
+        }
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+            document.getElementById('previewImg').src = '';
+        }
+
+        // ======= TOAST =======
+        let toastTimer;
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `show ${type}`;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { t.className = ''; }, 4000);
+        }
+    </script>
+</body>
+
+</html>
